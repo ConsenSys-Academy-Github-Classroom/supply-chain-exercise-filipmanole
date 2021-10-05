@@ -50,7 +50,9 @@ contract SupplyChain {
     _;
     uint _price = items[_sku].price;
     uint amountToRefund = msg.value - _price;
-    items[_sku].buyer.transfer(amountToRefund);
+
+    (bool success, ) = items[_sku].buyer.call.value(amountToRefund)("");
+    require(success, "Refund failed");
   }
 
   modifier forSale(uint _sku) {
@@ -102,7 +104,9 @@ contract SupplyChain {
     paidEnough(items[sku].price)
     checkValue(sku)
   {
-    items[sku].seller.transfer(items[sku].price);
+    (bool success, ) = items[sku].seller.call.value(items[sku].price)("");
+    require(success, "Transaction failed");
+    
     items[sku].buyer = msg.sender;
     items[sku].state = State.Sold;
 
